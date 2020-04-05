@@ -1,26 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import Flippy, { FrontSide, BackSide } from 'react-flippy';
 import './App.css';
 
+const useStyle = () => ({
+	flippy: { width: '200px', height: '200px', color: '#0D111B' },
+	front: { backgroundColor: '#F6F7F8' },
+	back: { backgroundColor: '#F6F7F8' }
+})
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const classes = useStyle();
+	const [joke, setJoke] = useState();
+	const [message, setMessage] = useState("Grab a random joke!");
+
+	useEffect(() => {
+		(async function () {
+			const response = await fetch('https://official-joke-api.appspot.com/random_joke');
+			const data = await response.json();
+
+			setJoke(data);
+		})();
+	}, []);
+
+	const getJoken = async () => {
+		setMessage("Loading...");
+		const response = await fetch('https://official-joke-api.appspot.com/random_joke');
+		const data = await response.json();
+
+		setJoke(data);
+		setMessage("Grab a random joke!");
+	};
+
+	return (
+		<div className="app">
+			<div>
+				<Flippy
+					flipOnClick={true}
+					flipDirection="horizontal"
+					style={classes.flippy}
+				>
+					<FrontSide style={classes.front}>
+						{joke && joke.setup}
+					</FrontSide>
+					<BackSide style={classes.back}>
+						{joke && joke.punchline}
+					</BackSide>
+				</Flippy>
+			</div>
+			<div>
+				<button
+					className="app-button"
+					onClick={getJoken}
+				>
+					{message}
+				</button>
+			</div>
+		</div>
+	);
 }
 
 export default App;
